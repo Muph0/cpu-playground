@@ -31,7 +31,8 @@ TEST_SUITE(test_parser) {
         Match ident(Token::Type::IDENT, "b101");
         test_assert(parse_whole(ident, "mov") == 5, "Fail");
     }
-    SHOULD("throw 2") {  //
-        throw 2;
+    SHOULD("match token by token text") {  //
+        Match hello("hello", "b111");
+        test_assert(parse_whole(hello, "hello ") == 7, "Fail");
     }
 }

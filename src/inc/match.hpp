@@ -2,6 +2,8 @@
 
 #include <functional>
 #include <string>
+#include <format>
+#include <iostream>
 #include <variant>
 
 #include "token.hpp"
@@ -76,15 +78,16 @@ class Match {
 
     Match() { parser = Seq(); }
     Match(Asm::Token::Type match) : Match(match, { 0, 0 }) {}
-    Match(Asm::Token::Type match, Out output) {
-        parser = Match::One([&](const In& token, Out& out) {
+    Match(Asm::Token::Type match_, Out output) {
+        auto match = match_;
+        parser = Match::One([=](const In& token, Out& out) {
             out = output;
             return token.type() == match;
         });
     }
     Match(const char* match) : Match(match, { 0, 0 }) {}
-    Match(const char* match, Out output) {
-        parser = Match::One([&](const In& token, Out& out) {
+    Match(const char* match, const Out& output) {
+        parser = Match::One([=](const In& token, Out& out) {
             out = output;
             return token.text() == match;
         });
