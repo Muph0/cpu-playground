@@ -57,7 +57,7 @@ foreach(test ${test_sources})
         string(REGEX REPLACE "[^A-Za-z0-9:/!.,']" "_" should ${should})
         string(REGEX REPLACE "\\.cpp" "" test ${test})
         message("part: " ${part} " " ${should})
-        add_test(${test}_${should} ${TEST_PATH}/test_runner ${test} ${part})
+        add_test(${test}_${part}_${should} ${TEST_PATH}/test_runner ${test} ${part})
     endforeach()
 
 endforeach()

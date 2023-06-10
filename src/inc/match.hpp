@@ -46,7 +46,6 @@ class Match {
 
             for (auto&& opt : options) {
                 auto it = start;
-
                 if (opt.parse(it, end, result)) {
                     start = it;
                     out = result;
@@ -58,7 +57,7 @@ class Match {
     };
     class Seq {
         std::vector<Match> sequence_;
-        Out (*reducer_)(const std::vector<Out>&){ nullptr };
+        Out (*reducer_)(const std::vector<Out>&) = bits::cat;
 
        public:
         Seq() = default;
@@ -68,14 +67,18 @@ class Match {
             : sequence_(matches), reducer_(reducer) {}
         bool parse(InPtr& start, InPtr end, Out& out) {
             auto it = start;
-            Out result;
+            std::vector<Out> results;
 
             for (auto&& item : sequence_) {
                 Out itemResult;
                 if (!item.parse(it, end, itemResult)) { return false; }
-                result.push_back(itemResult);
+                results.push_back(itemResult);
             }
-            out = result;
+            if (reducer_ != nullptr) {
+                out = reducer_(results);
+            } else {
+                out = bits::cat(results);
+            }
             return true;
         }
     };

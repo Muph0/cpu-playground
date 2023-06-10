@@ -16,16 +16,19 @@ class bits_t {
     int size_{ 0 };
     uint64_t value_{ 0 };
 
-    cnex uint64_t mask() const { return (1ull << size_) - 1; }
+    cnex uint64_t mask(uint64_t x) const { return x & ((1ull << size_) - 1); }
 
    public:
-    cnex auto value() const { return value_ & mask(); }
+    cnex auto value() const { return mask(value_); }
 
     /** Returns the size in bits. */
     cnex auto size() const { return size_; }
 
     /** Change the number of bits stored. */
-    void resize(int new_size) { size_ = new_size; }
+    void resize(int new_size) {
+        size_ = new_size;
+        value_ = value();
+    }
 
     cnex bits_t() : size_(0), value_(0) {}
     cnex bits_t(uint64_t x, int size) : size_(size), value_(0) { *this = x; }
@@ -53,52 +56,55 @@ class bits_t {
             value_ |= digit;
             size_ += digit_bits;
         }
+        value_ = value();
     }
 
     // assignments
     cnex bits_t operator=(uint64_t other) {
-        value_ = other;
+        value_ = mask(other);
         return *this;
     }
 
     // relations
-    cnex bool operator==(uint64_t other) const { return value_ == other; }
-    //cnex bool operator==(int64_t other) const { return value_ == other; }
-    cnex bool operator>(uint64_t other) const { return value_ > other; }
-    cnex bool operator<(uint64_t other) const { return value_ < other; }
-    cnex bool operator>=(uint64_t other) const { return value_ >= other; }
-    cnex bool operator<=(uint64_t other) const { return value_ <= other; }
+    cnex bool operator==(uint64_t x) const { return value() == mask(x); }
+    // cnex bool operator>(uint64_t x) const { return value() > mask(x); }
+    // cnex bool operator<(uint64_t x) const { return value() < mask(x); }
+    // cnex bool operator>=(uint64_t x) const { return value() >= mask(x);
+    // } cnex bool operator<=(uint64_t x) const { return value() <= mask(x); }
 
     // arithmetic
-    cnex bits_t operator+(uint64_t x) const { return { value_ + x, size_ }; }
-    cnex bits_t operator-(uint64_t x) const { return { value_ - x, size_ }; }
-    cnex bits_t operator*(uint64_t x) const { return { value_ * x, size_ }; }
-    cnex bits_t operator/(uint64_t x) const { return { value_ / x, size_ }; }
+    cnex bits_t operator+(uint64_t x) const { return { value() + x, size_ }; }
+    cnex bits_t operator-(uint64_t x) const { return { value() - x, size_ }; }
+    cnex bits_t operator*(uint64_t x) const { return { value() * x, size_ }; }
+    cnex bits_t operator/(uint64_t x) const { return { value() / x, size_ }; }
 
-    cnex bits_t operator&(uint64_t x) const { return { value_ & x, size_ }; }
-    cnex bits_t operator|(uint64_t x) const { return { value_ | x, size_ }; }
-    cnex bits_t operator<<(uint64_t x) const { return { value_ << x, size_ }; }
-    cnex bits_t operator>>(uint64_t x) const { return { value_ >> x, size_ }; }
+    cnex bits_t operator&(uint64_t x) const { return { value() & x, size_ }; }
+    cnex bits_t operator|(uint64_t x) const { return { value() | x, size_ }; }
+    cnex bits_t operator<<(uint64_t x) const { return { value() << x, size_ }; }
+    cnex bits_t operator>>(uint64_t x) const { return { value() >> x, size_ }; }
 
-    cnex void operator+=(uint64_t x) { value_ += x; }
-    cnex void operator-=(uint64_t x) { value_ -= x; }
-    cnex void operator*=(uint64_t x) { value_ *= x; }
-    cnex void operator/=(uint64_t x) { value_ /= x; }
+    cnex bits_t operator+=(uint64_t x) { return *this = value() + x; }
+    cnex bits_t operator-=(uint64_t x) { return *this = value() - x; }
+    cnex bits_t operator*=(uint64_t x) { return *this = value() * x; }
+    cnex bits_t operator/=(uint64_t x) { return *this = value() / x; }
 
-    cnex bits_t operator++() {
-        value_ = (value_ + 1);
-        return *this;
-    }
+    cnex bits_t operator++() { return *this += 1; }
     cnex bits_t operator++(int) {
-        long now = value_;
-        value_ = (value_ + 1);
-        return bits_t(now, size_);
+        bits_t now = *this;
+        *this += 1;
+        return now;
+    }
+    cnex bits_t operator--() { return *this -= 1; }
+    cnex bits_t operator--(int) {
+        bits_t now = *this;
+        *this -= 1;
+        return now;
     }
 
     /** Concatenate another bits_t to the right of this one. */
     void push_back(const bits_t& other) {
-        value_ = value_ << other.size() | other.value();
         size_ += other.size();
+        *this = value_ << other.size() | other.value();
     }
 
     class ctor {
@@ -110,6 +116,15 @@ class bits_t {
         cnex bits_t operator()(long value) { return bits_t(value, bits_); }
     };
 };
+
+namespace bits {
+/** Concatenate vector of bits_t to one instance. */
+static bits_t cat(const std::vector<bits_t>& results) {
+    bits_t reduced;
+    for (auto&& r : results) { reduced.push_back(r); }
+    return reduced;
+}
+}  // namespace bits
 
 class symbol {
    public:

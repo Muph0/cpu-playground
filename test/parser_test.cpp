@@ -46,12 +46,12 @@ TEST_SUITE(parser_test) {
         assert_parses(any, "dx");
     }
     SHOULD("match integer") {
-        Match any = Match::Integer(8);
-        expect_eq(assert_parses(any, "0"), 0);
-        expect_eq(assert_parses(any, "100"), 100);
-        expect_eq(assert_parses(any, "255"), 255);
-        expect_eq(assert_parses(any, "65535"), 255);
-        expect_eq(assert_parses(any, "-1"), 255);
+        Match byte = Match::Integer(8);
+        expect_eq(assert_parses(byte, "-1"), 255);
+        expect_eq(assert_parses(byte, "0"), 0);
+        expect_eq(assert_parses(byte, "100"), 100);
+        expect_eq(assert_parses(byte, "255"), 255);
+        expect_eq(assert_parses(byte, "65535"), 255);
     }
     SHOULD("match instruction") {
         auto reg = Match::Any({ { "ax", 2_bit(0) },
