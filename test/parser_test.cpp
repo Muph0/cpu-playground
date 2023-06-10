@@ -47,8 +47,13 @@ TEST_SUITE(parser_test) {
     }
     SHOULD("match integer") {
         Match byte = Match::Integer(8);
-        expect_eq(assert_parses(byte, "-1"), 255);
+        expect_eq(assert_parses(byte, "0xf"), 15);
+        expect_eq(assert_parses(byte, "0b111"), 7);
+        expect_eq(assert_parses(byte, "0100"), 64);
+        expect_eq(assert_parses(byte, "-1"), -1);
         expect_eq(assert_parses(byte, "0"), 0);
+        expect_eq(assert_parses(byte, "+5"), 5);
+        expect_eq(assert_parses(byte, "-13"), -13);
         expect_eq(assert_parses(byte, "100"), 100);
         expect_eq(assert_parses(byte, "255"), 255);
         expect_eq(assert_parses(byte, "65535"), 255);
