@@ -20,15 +20,6 @@ std::vector<Token> Asm::tokenize(const std::string& text) {
     return result;
 }
 
-constexpr static int digit(int d) {
-    switch (d) {
-    case '0' ... '9': return d - '0';
-    case 'A' ... 'Z': return d - 'A' + 10;
-    case 'a' ... 'z': return d - 'a' + 10;
-    default: return -1;
-    }
-}
-
 constexpr static int base_spec(int b) {
     switch (b) {
     case '0' ... '9': return 8;
@@ -44,7 +35,7 @@ std::optional<Token> Asm::next_token(const char*& it, const char* end) {
 
     Type type = NONE;
     std::string text;
-    unsigned long long value = 0;
+    uint64_t value = 0;
 
 #define finish()                                                   \
     do {                                                           \
@@ -86,11 +77,13 @@ std::optional<Token> Asm::next_token(const char*& it, const char* end) {
             int base = base_spec(*it);
             if (base != 8) accept();
 
-            do {
-                int d = digit(*it);
+            int d = todigit(*it);
+            while (0 <= d && d < base) {
                 value = value * base + d;
                 accept();
-            } while (digit(*it) < base);
+                d = todigit(*it);
+            }
+            finish();
         } break;
 
         case '1' ... '9': {

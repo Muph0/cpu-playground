@@ -26,11 +26,11 @@ class Token {
     Type type{ Type::IDENT };
     std::string text;
     /** Numeric value for INT token. */
-    num_t number{ 0 };
+    uint64_t number{ 0 };
 
-    Token(std::string&& _text, Type _type, num_t value)
+    Token(std::string&& _text, Type _type, uint64_t value)
         : text(_text), type(_type), number(value) {}
-    Token(const std::string& _text, Type _type, num_t value)
+    Token(const std::string& _text, Type _type, uint64_t value)
         : text(_text), type(_type), number(value) {}
 };
 

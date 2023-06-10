@@ -11,6 +11,16 @@
 
 #define cnex constexpr
 
+/** Get numeric value of a digit character */
+constexpr static int todigit(char d) {
+    switch (d) {
+    case '0' ... '9': return d - '0';
+    case 'A' ... 'Z': return d - 'A' + 10;
+    case 'a' ... 'z': return d - 'a' + 10;
+    default: return -1;
+    }
+}
+
 class bits_t {
    private:
     int size_{ 0 };
@@ -50,7 +60,7 @@ class bits_t {
 
         int base = 1 << digit_bits;
         for (size_t i = 1; i < len; ++i) {
-            int digit = bits[i] - '0';
+            int digit = todigit(bits[i]);
             if (digit < 0 || digit >= base) throw logic_error(msg);
             value_ <<= digit_bits;
             value_ |= digit;

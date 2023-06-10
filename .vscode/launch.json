@@ -10,8 +10,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/test_runner.exe",
             "args": [
-                "test/parser_test",
-                "4"
+                "test/tokenizer_test",
+                "5"
             ],
             "stopAtEntry": false,
             "cwd": ".",

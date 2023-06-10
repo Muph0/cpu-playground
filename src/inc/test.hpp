@@ -33,7 +33,7 @@
         if (!(expr)) {                                            \
             std::string msg = __FILE__ ":" QUOTE(__LINE__) ":\n"; \
             std::format_to(std::back_inserter(msg),               \
-                           "Expected " #expr __VA_ARGS__);        \
+                           "Expected " #expr "\n" __VA_ARGS__);        \
             throw std::logic_error(msg);                          \
         }                                                         \
     } while (0)
@@ -43,7 +43,7 @@
         if (!((a) == (b))) {                                         \
             std::string msg = __FILE__ ":" QUOTE(__LINE__) ":\n";    \
             std::format_to(std::back_inserter(msg),                  \
-                           "Expected " #a " == " #b "; got {}", a);  \
+                           "Expected " #a " == {}; got {}\n", b, a);  \
             std::format_to(std::back_inserter(msg), "" __VA_ARGS__); \
             throw std::logic_error(msg);                             \
         }                                                            \
