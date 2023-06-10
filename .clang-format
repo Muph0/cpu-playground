@@ -1,0 +1,9 @@
+---
+BasedOnStyle: Google
+IndentWidth: 4
+Cpp11BracedListStyle: false
+ArrayInitializerAlignmentStyle: Left
+IndentCaseLabels: false
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: true
+---
