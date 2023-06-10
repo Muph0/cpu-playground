@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "types.hpp"
+
 namespace Asm {
 
 class Token {
@@ -16,19 +18,20 @@ class Token {
         CLOSE_BRACE,
         OPEN_PAREN,
         CLOSE_PAREN,
+        COMMA,
         SYMBOL
     };
 
-   private:
-    Type type_;
-    std::string text_;
-
    public:
-    Token(std::string&& text, Type type);
-    Token(const std::string& text, Type type);
+    Type type{ Type::IDENT };
+    std::string text;
+    /** Numeric value for INT token. */
+    num_t number{ 0 };
 
-    auto type() const { return type_; }
-    const std::string& text() const { return text_; }
+    Token(std::string&& _text, Type _type, num_t value)
+        : text(_text), type(_type), number(value) {}
+    Token(const std::string& _text, Type _type, num_t value)
+        : text(_text), type(_type), number(value) {}
 };
 
 std::vector<Token> tokenize(const std::string& text);
@@ -49,14 +52,16 @@ struct std::formatter<Asm::Token::Type, char> {
         auto out = ctx.out();
 
         switch (type) {
-        case Type::IDENT: return format_to(out, "IDENT");
+        case Type::IDENT: return format_to(out, "IDENT", 0);
         case Type::INT: return format_to(out, "INT");
         case Type::OPEN_BRACE: return format_to(out, "OPEN_BRACE");
         case Type::CLOSE_BRACE: return format_to(out, "CLOSE_BRACE");
         case Type::OPEN_PAREN: return format_to(out, "OPEN_PAREN");
         case Type::CLOSE_PAREN: return format_to(out, "CLOSE_PAREN");
+        case Type::COMMA: return format_to(out, "COMMA");
         case Type::SYMBOL: return format_to(out, "SYMBOL");
         }
+
         return format_to(out, "Type<{}>", (int)type);
     }
 };
@@ -71,8 +76,8 @@ struct std::formatter<Asm::Token, char> {
 
     auto format(const Asm::Token& token, std::format_context& ctx) const {
         using namespace std;
-        return format_to(ctx.out(), "{}(\"{}\")", token.type(),
-                         token.text().c_str());
+        return format_to(ctx.out(), "{}(\"{}\")", token.type,
+                         token.text.c_str());
     }
 };
 //*/

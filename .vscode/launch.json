@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/test_runner.exe",
             "args": [
-                "test/parser",
+                "test/bits_test",
                 "1"
             ],
             "stopAtEntry": false,

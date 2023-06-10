@@ -53,6 +53,8 @@
         "span": "cpp",
         "variant": "cpp",
         "ctime": "cpp",
-        "map": "cpp"
-    }
+        "map": "cpp",
+        "typeindex": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

@@ -42,10 +42,11 @@ foreach(test ${test_sources})
     string(REGEX MATCH "TEST_SUITE\\(([A-Za-z_0-9]+)\\)" _ ${suite_name})
     set(suite_name ${CMAKE_MATCH_1})
 
-    if(${test_entry} STREQUAL ${suite_name})
+    string(REGEX REPLACE "^test_" "" test_must_be ${test_entry})
+    if(${test_must_be} STREQUAL ${suite_name})
         message(STATUS "Found test entry point.")
     else()
-        message(WARNING "Test \"" ${test} "\":\nSuite name must be " ${test_entry} ", not " ${suite_name})
+        message(WARNING "Test \"" ${test} "\":\nSuite name must be " ${test_must_be} ", not " ${suite_name})
     endif()
 
     set(part 0)

@@ -14,16 +14,16 @@ static void run_test(const string& input, vector<Type> expected) {
     bool same = tokens.size() == expected.size();
 
     for (size_t i = 0; same && i < tokens.size(); ++i) {
-        same = tokens[i].type() == expected[i];
+        same = tokens[i].type == expected[i];
     }
 
-    test_assert(same, "Expected {},\ngot {}.", expected, tokens);
+    expect(same, "Expected {},\ngot {}.", expected, tokens);
 }
 
-TEST_SUITE(test_tokenizer) {
+TEST_SUITE(tokenizer_test) {
     SHOULD("parse basic instruction") {
         run_test("add 1, 1",
-                 { Type::IDENT, Type::INT, Type::SYMBOL, Type::INT });
+                 { Type::IDENT, Type::INT, Type::COMMA, Type::INT });
     }
     SHOULD("parse brackets") {
         run_test("hello[1](1)1",

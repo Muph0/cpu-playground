@@ -4,9 +4,6 @@
 
 using namespace Asm;
 
-Token::Token(const std::string& text, Type type) : text_(text), type_(type) {}
-Token::Token(std::string&& text, Type type) : text_(text), type_(type) {}
-
 std::vector<Token> Asm::tokenize(const std::string& text) {
     std::vector<Token> result;
 
@@ -29,11 +26,12 @@ std::optional<Token> Asm::next_token(const char*& it, const char* end) {
 
     Type type = NONE;
     std::string text;
+    unsigned long long value = 0;
 
 #define finish()                                            \
     do {                                                    \
         if (text.size() != 0)                               \
-            return std::move(Token(std::move(text), type)); \
+            return std::move(Token(std::move(text), type, value)); \
         else                                                \
             return {};                                      \
     } while (0)
@@ -66,7 +64,10 @@ std::optional<Token> Asm::next_token(const char*& it, const char* end) {
 
         case '0' ... '9': {
             type = Type::INT;
-            do { accept(); } while (isdigit(*it));
+            do {
+                value = value * 10 + (*it - '0');
+                accept();
+            } while (isdigit(*it));
             finish();
         } break;
 
@@ -78,6 +79,7 @@ std::optional<Token> Asm::next_token(const char*& it, const char* end) {
         case ')': type = Type::CLOSE_PAREN; break;
         case '[': type = Type::OPEN_BRACE; break;
         case ']': type = Type::CLOSE_BRACE; break;
+        case ',': type = Type::COMMA; break;
         default: type = Type::SYMBOL; break;
         }
     }

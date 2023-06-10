@@ -5,7 +5,7 @@
 
 #define TEST_SUITE(name)                                           \
     static void test_switcher(int, bool);                          \
-    int name(int argc, char** argv) {                              \
+    int test_##name(int argc, char** argv) {                              \
         int choice = 1;                                            \
         if (argc > 1) {                                            \
             if (sscanf(argv[1], "%d", &choice) != 1) {             \
@@ -20,7 +20,7 @@
     }                                                              \
     static void test_switcher(int choice, bool all)
 
-#define SHOULD(msg)                                                 \
+#define SHOULD(msg)                                          \
     if (--choice == 0) printf("This test should " msg "\n"); \
     if (all || choice == 0)
 
@@ -28,11 +28,25 @@
 #include <stdexcept>
 #include <vector>
 
-#define test_assert(expr, ...)                                    \
+#define expect(expr, ...)                                         \
     do {                                                          \
         if (!(expr)) {                                            \
             std::string msg = __FILE__ ":" QUOTE(__LINE__) ":\n"; \
-            std::format_to(std::back_inserter(msg), __VA_ARGS__); \
+            std::format_to(std::back_inserter(msg),               \
+                           "Expected " #expr __VA_ARGS__);        \
             throw std::logic_error(msg);                          \
         }                                                         \
     } while (0)
+
+#define expect_eq(a, b, ...)                                         \
+    do {                                                             \
+        if (!((a) == (b))) {                                         \
+            std::string msg = __FILE__ ":" QUOTE(__LINE__) ":\n";    \
+            std::format_to(std::back_inserter(msg),                  \
+                           "Expected " #a " == " #b "; got {}", a);  \
+            std::format_to(std::back_inserter(msg), "" __VA_ARGS__); \
+            throw std::logic_error(msg);                             \
+        }                                                            \
+    } while (0)
+
+//

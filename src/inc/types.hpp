@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <cstring>
 #include <format>
 #include <stdexcept>
@@ -8,28 +9,27 @@
 
 #define num_t unsigned long long
 
+#define cnex constexpr
+
 class bits_t {
    private:
     int size_{ 0 };
-    long value_{ 0 };
+    uint64_t value_{ 0 };
 
-    constexpr long mask() const { return (1 << size_) - 1; }
+    cnex uint64_t mask() const { return (1ull << size_) - 1; }
 
    public:
-    constexpr auto value() const { return value_; }
+    cnex auto value() const { return value_ & mask(); }
 
     /** Returns the size in bits. */
-    constexpr auto size() const { return size_; }
+    cnex auto size() const { return size_; }
 
     /** Change the number of bits stored. */
-    void resize(int new_size) {
-        size_ = new_size;
-        value_ &= mask();
-    }
+    void resize(int new_size) { size_ = new_size; }
 
-    constexpr bits_t() : size_(0), value_(0) {}
-    constexpr bits_t(num_t x, int size) : size_(size), value_(0) { *this = x; }
-    constexpr bits_t(const char* bits) {
+    cnex bits_t() : size_(0), value_(0) {}
+    cnex bits_t(uint64_t x, int size) : size_(size), value_(0) { *this = x; }
+    cnex bits_t(const char* bits) {
         using namespace std;
         string msg = "Invalid bits_t format: ";
         msg.append(bits);
@@ -56,41 +56,42 @@ class bits_t {
     }
 
     // assignments
-    constexpr bits_t operator=(num_t other) {
-        value_ = other & mask();
+    cnex bits_t operator=(uint64_t other) {
+        value_ = other;
         return *this;
     }
 
     // relations
-    constexpr bool operator==(num_t other) { return value_ == other; }
-    constexpr bool operator>(num_t other) { return value_ > other; }
-    constexpr bool operator<(num_t other) { return value_ < other; }
-    constexpr bool operator>=(num_t other) { return value_ >= other; }
-    constexpr bool operator<=(num_t other) { return value_ <= other; }
+    cnex bool operator==(uint64_t other) const { return value_ == other; }
+    //cnex bool operator==(int64_t other) const { return value_ == other; }
+    cnex bool operator>(uint64_t other) const { return value_ > other; }
+    cnex bool operator<(uint64_t other) const { return value_ < other; }
+    cnex bool operator>=(uint64_t other) const { return value_ >= other; }
+    cnex bool operator<=(uint64_t other) const { return value_ <= other; }
 
     // arithmetic
-    constexpr num_t operator+(num_t other) { return value_ + other; }
-    constexpr num_t operator-(num_t other) { return value_ - other; }
-    constexpr num_t operator*(num_t other) { return value_ * other; }
-    constexpr num_t operator/(num_t other) { return value_ / other; }
+    cnex bits_t operator+(uint64_t x) const { return { value_ + x, size_ }; }
+    cnex bits_t operator-(uint64_t x) const { return { value_ - x, size_ }; }
+    cnex bits_t operator*(uint64_t x) const { return { value_ * x, size_ }; }
+    cnex bits_t operator/(uint64_t x) const { return { value_ / x, size_ }; }
 
-    constexpr num_t operator&(num_t other) { return value_ & other; }
-    constexpr num_t operator|(num_t other) { return value_ | other; }
-    constexpr num_t operator<<(num_t other) { return value_ << other; }
-    constexpr num_t operator>>(num_t other) { return value_ >> other; }
+    cnex bits_t operator&(uint64_t x) const { return { value_ & x, size_ }; }
+    cnex bits_t operator|(uint64_t x) const { return { value_ | x, size_ }; }
+    cnex bits_t operator<<(uint64_t x) const { return { value_ << x, size_ }; }
+    cnex bits_t operator>>(uint64_t x) const { return { value_ >> x, size_ }; }
 
-    constexpr void operator+=(num_t other) { value_ += other; }
-    constexpr void operator-=(num_t other) { value_ -= other; }
-    constexpr void operator*=(num_t other) { value_ *= other; }
-    constexpr void operator/=(num_t other) { value_ /= other; }
+    cnex void operator+=(uint64_t x) { value_ += x; }
+    cnex void operator-=(uint64_t x) { value_ -= x; }
+    cnex void operator*=(uint64_t x) { value_ *= x; }
+    cnex void operator/=(uint64_t x) { value_ /= x; }
 
-    constexpr bits_t operator++() {
-        value_ = (value_ + 1) & mask();
+    cnex bits_t operator++() {
+        value_ = (value_ + 1);
         return *this;
     }
-    constexpr bits_t operator++(int) {
+    cnex bits_t operator++(int) {
         long now = value_;
-        value_ = (value_ + 1) & mask();
+        value_ = (value_ + 1);
         return bits_t(now, size_);
     }
 
@@ -102,11 +103,11 @@ class bits_t {
 
     class ctor {
        private:
-        num_t bits_;
+        uint64_t bits_;
 
        public:
-        constexpr ctor(num_t bits) : bits_(bits) {}
-        constexpr bits_t operator()(long value) { return bits_t(value, bits_); }
+        cnex ctor(uint64_t bits) : bits_(bits) {}
+        cnex bits_t operator()(long value) { return bits_t(value, bits_); }
     };
 };
 
@@ -120,11 +121,22 @@ class symbol {
 };
 
 template <typename Tchar, Tchar... str>
-constexpr bits_t operator"" _bits() {
+cnex bits_t operator"" _bits() {
     const char str2[] = { str..., '\0' };
     return bits_t(str2);
 }
 
-constexpr bits_t::ctor operator""_bit(num_t bits) {
-    return bits_t::ctor{ bits };
-}
+cnex bits_t::ctor operator""_bit(uint64_t bits) { return bits_t::ctor{ bits }; }
+
+template <>
+struct std::formatter<bits_t, char> {
+    constexpr auto parse(std::format_parse_context& ctx) {
+        auto it = ctx.begin();
+        while (it != ctx.end() && *it != '}') { ++it; }
+        return it;
+    }
+
+    auto format(const bits_t& b, std::format_context& ctx) const {
+        return std::format_to(ctx.out(), "b{:0{}b}", b.value(), b.size());
+    }
+};
