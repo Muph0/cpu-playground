@@ -93,7 +93,9 @@ class Match {
             return token.type == match;
         });
     }
+    /** Accept a token with specified text */
     Match(const char* match) : Match(match, { 0, 0 }) {}
+    /** Accept a token with specified text and return output */
     Match(const char* match, const Out& output) {
         parser = One([=](const In& token, Out& out) {
             out = output;
